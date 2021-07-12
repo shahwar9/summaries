@@ -1,0 +1,36 @@
+% Use extarticle for the smaller font size:
+% https://tex.stackexchange.com/questions/5339/how-to-specify-font-size-less-than-10pt-or-more-than-12pt
+\documentclass[a4paper, 8pt]{extarticle}
+
+% Multi-column layout
+\usepackage{multicol}
+\usepackage{color}
+\setlength{\columnseprule}{1pt}
+\def\columnseprulecolor{\color{blue}}
+
+% Manually set page margins
+\usepackage[margin=0.3cm]{geometry}
+
+% Manually set margins on lists
+\usepackage{enumitem}
+% Change list margins - https://tex.stackexchange.com/questions/10684/vertical-space-in-lists
+\setlist{leftmargin=2mm, nosep}
+% or \setlist{noitemsep} to leave space around whole list
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\title{Summary Notes}
+\author{Shahwar Saleem}
+
+\begin{document}
+
+% 3-column layout
+\begin{multicols*}{2}
+
+Here is sample
+
+\end{multicols*}
+\end{document}
