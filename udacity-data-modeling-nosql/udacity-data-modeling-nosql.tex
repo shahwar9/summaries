@@ -1,0 +1,163 @@
+%%%%%%%%%% SETTINGS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[
+	paper=a4,%
+	pagesize,%
+	8pt, fleqn,%
+	headings=small,%
+	notitlepage,%
+	parskip=never]%
+	{scrreprt}
+	
+% TODO: Edit metadata!
+	
+\newcommand{\mytitle}{NoSQL Data Models}
+\newcommand{\myauthor}{Shahwar Saleem}
+
+\input{options}
+
+\begin{document}
+\begin{multicols*}{3}
+
+% Title
+{\bfseries\sffamily\LARGE\mytitle} \vspace{0.35em}  \hfill \myauthor, \today \vspace{0.5em}
+
+%\tableofcontents
+
+%%%%%%%%%% INPUT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\hfill
+
+\chapter{Non-Relational Databases}
+Also Not Only SQL.
+
+
+\subsubsection*{When NOT to use SQL:}
+\begin{itemize}
+\item \textbf{Need high Availability in the data}: Indicates the system is always up and there is no downtime
+Have Large Amounts of Data
+
+\item \textbf{Need Linear Scalability}: The need to add more nodes to the system so performance will increase linearly
+
+\item \textbf{Low Latency}: Shorter delay before the data is transferred once the instruction for the transfer has been received.
+
+\item \textbf{Need fast reads and write}
+
+\end{itemize}
+
+\subsection{Apache Cassandra}
+\begin{itemize}
+\item Open Source NoSQL DB
+\item Masterless Architecture
+\item High Availability
+\item Linear Scalable
+\item Used by Uber, Netflix, Hulu, Twitter, Facebook etc
+\item Major contributors to project: Datastax, Facebook, Twitter, Apple.
+\end{itemize}
+
+\subsection{Distributed Databases}
+\begin{itemize}
+\item In a distributed database, in order to have high availability, you will \textbf{need copies of data}
+\item Scaled out horizontally, made up of multiple nodes.
+\item High availability i.e no down time. Nodes will fail, therefore, need copies of data.
+
+\end{itemize}
+
+\subsubsection{Eventual Consistency}
+
+\paragraph{A consistency model used in distributed computing to achieve high availability that informally guarantees that, if no new updates are made to a given data item, eventuall all accesses to that item will return the last updated value.}
+
+\subsection{CAP Theorem}
+It is impossible for a distributed data store to \textbf{simultaneously provide} more than two out of the following three guarantees: \textbf{CONSISTENCY, AVAILABILITY and PARTITION TOLERANCE}.
+
+\begin{itemize}
+\item \textbf{Consistency} Every read from the database gets the latest (and correct) piece of data or an error.
+\item \textbf{Availability} Every request is received and a response is given -- without a guarantee that the data is the latest update.
+\item \textbf{Partition Tolerance} The system continues to work regardless of losing network connectivity between nodes.
+\end{itemize}
+
+\subsubsection*{Apache Cassandra}
+Apache Cassandra chooses to be highly available at the cost of consistency. It is an AP (Availability and Partition Tolerant) database. [Consistency issues only come up during network failures]
+
+\subsubsection*{Which of these combinations is desirable for a production system - Consistency and Availability, Consistency and Partition Tolerance, or Availability and Partition Tolerance?}
+
+As the CAP Theorem Wikipedia entry says, \paragraph{"The CAP theorem implies that in the presence of a network partition, one has to choose between consistency and availability."}
+
+So there is no such thing as Consistency and Availability in a distributed database since it must always tolerate network issues. You can only have Consistency and Partition Tolerance (CP) or Availability and Partition Tolerance (AP). Remember, relational and non-relational databases do different things, and that's why most companies have both types of database systems.
+
+\subsection{Denormalization in Apache Cassandra}
+Denormalization of tables in Apache Cassandra is absolutely critical.
+
+New data modeling tasks are required to translate Relational Model to Non-Relational Model.
+
+\subsection*{Data Modeling in Apache Cassandra}
+\begin{itemize}
+\item Denormalization is not just okay -- it's a must
+\item Denormalization must be done for fast reads: Apache Cassandra is optimized for fast writes: To have fast reads, a good data model should be formed.
+\item Apache Cassandra has been optimized for fast writes: Updating multiple tables should not be a concern like it was in SQL DBs.
+\item ALWAYS think Queries first
+\item One table per query is a great strategy - Needs data redundancy. One query should access one table, no joins are allowed.
+\item Apache Cassandra does NOT allow for JOINs between tables
+\end{itemize}
+
+\subsubsection{Cassanda Query Language}
+\begin{itemize}
+\item CQL is the way to interact with database and is similar to SQL.
+\item JOINS, GROUPBY, or subqueries are not supported in CQL
+\end{itemize}
+
+\subsection{Primary Key}
+\paragraph{Primary Key is how each row can be uniquely identified and how the data is distributed across the nodes (or servers) in our system.}
+
+\begin{itemize}
+\item The first element of PRIMARY KEY is the PARTITION KEY (which will determine the distribution)
+\item PRIMARY KEY is made up of either just the PARTITION KEY or with the addition of CLUSTERING COLUMNS.
+\item PARTITION KEY will determine the distribution of data across the system
+\item The partition key's row value will be hashed (turned into a number) and stored on the node in the system that holds that range of values.
+\end{itemize}
+
+KEY POINTS:
+
+\begin{itemize}
+\item Primary Key must be UNIQUE. No Duplicates in Apache Cassandra
+\item Hashing of this value results in placement on a particular note in the system.
+\item Data distributed by this partition key. (Partition by state will see uneven partitions)
+\item Composite: More than 1 column. 
+\item May have 1 or more clustering columns.
+\end{itemize}
+
+\subsection{Clustering Columns}
+\paragraph{Primary key is made up of either just PARTITION KEY or with addition of CLUSTERING COLUMNS.}
+
+\begin{itemize}
+\item CLUSTERING COLUMNS will determine the sort order within a partition.
+\item The CLUSTERING COLUMNS will sorte the data in sorted ascending order. e.g alphabetical order. 
+\item More than one CLUSTERING COLUMN can be added. 
+\item CLUSTERING COLUMNS will sort in order of how they are added to primary key. They must also be used IN ORDER in a SELECT statement.
+\end{itemize}
+
+\subsection{WHERE Clause}
+\paragraph{Data Modeling in Apache Cassandra is query focused and that focus needs to be on the WHERE clause.}
+
+\begin{itemize}
+\item \textbf{PARTITION KEY MUST be included in your query and any Clustering Columns can be used in the order they appear in your PRIMARY KEY}
+
+\item \textbf{Failure to include a WHERE clause will result in an ERROR}
+
+\item Recommended that one partition be queried at a time for performance implications.
+\end{itemize}
+
+\subsubsection*{SELECT * FROM Table is not recommended}
+
+\subsubsection*{Why do we need to use a WHERE statement since we are not concerned about analytics? Is it only for debugging purposes?}
+The WHERE statement is allowing us to do the fast reads. With Apache Cassandra, we are talking about big data -- think terabytes of data -- so we are making it fast for read purposes. Data is spread across all the nodes. By using the WHERE statement, we know which node to go to, from which node to get that data and serve it back. For example, imagine we have 10 years of data on 10 nodes or servers. So 1 year's data is on a separate node. By using the WHERE year = 1 statement we know which node to visit fast to pull the data from.
+
+%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newpage
+%\columnbreak
+\nocite{*}
+\printbibliography
+
+\end{multicols*}
+\end{document}
